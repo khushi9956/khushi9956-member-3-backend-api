@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { getWorkspaces, getStats } = require('../controllers/workspaceController');
-const { protect } = require('../middlewares/authMiddleware');
-const { scopeToOrganization } = require('../middlewares/roleMiddleware');
+const { protect } = require('../../member-4-database-auth/middlewares/authMiddleware');
+const { scopeToOrganization } = require('../../member-4-database-auth/middlewares/roleMiddleware');
 
 router.use(protect);
 router.use(scopeToOrganization);

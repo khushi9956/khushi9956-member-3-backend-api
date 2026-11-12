@@ -1,19 +1,4 @@
-const { Project, Task, Workspace, User } = require('../models');
-
-// Returns the ids from `memberIds` that do not belong to this organization.
-const findOutsideMembers = async (memberIds, organizationId) => {
-  if (!Array.isArray(memberIds) || memberIds.length === 0) return [];
-  const people = await User.find({ organization: organizationId });
-  const allowed = new Set(people.map((p) => p._id.toString()));
-  return memberIds.filter((id) => !allowed.has(String(id)));
-};
-
-const outsideMembersResponse = (res) =>
-  res.status(400).json({
-    success: false,
-    message: 'Every project member must belong to your organization.',
-  });
-
+const { Project, Task, Workspace } = require('../../member-4-database-auth/models');
 
 /**
  * @desc    Get all projects for authenticated user's organization
@@ -115,8 +100,6 @@ const createProject = async (req, res, next) => {
     const orgId = req.user.organization._id || req.user.organization;
     const { name, key, description, workspaceId, members, dueDate } = req.body;
 
-    if ((await findOutsideMembers(members, orgId)).length > 0) return outsideMembersResponse(res);
-
     // Check key uniqueness within organization
     const existingKey = await Project.findOne({
       organization: orgId,
@@ -195,10 +178,6 @@ const updateProject = async (req, res, next) => {
     }
 
     const { name, description, status, members, dueDate } = req.body;
-
-    if (members && (await findOutsideMembers(members, orgId)).length > 0) {
-      return outsideMembersResponse(res);
-    }
 
     if (name) project.name = name.trim();
     if (description !== undefined) project.description = description;

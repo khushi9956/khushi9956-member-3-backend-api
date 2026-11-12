@@ -1,26 +1,4 @@
-const { Task, Project, User } = require('../models');
-
-const idOf = (ref) => (ref && ref._id ? ref._id : ref);
-const sameId = (a, b) => Boolean(a) && Boolean(b) && idOf(a).toString() === idOf(b).toString();
-
-// Owners and managers can change any task. Everyone else only their own
-// (assigned to them or created by them).
-const canEditTask = (user, task) =>
-  ['owner', 'manager'].includes(user.role) || sameId(task.assignee, user._id) || sameId(task.creator, user._id);
-
-// A task can only be given to someone who belongs to the same organization.
-const assigneeInOrganization = async (assigneeId, organizationId) => {
-  if (!assigneeId) return true;
-  const person = await User.findOne({ _id: assigneeId, organization: organizationId });
-  return Boolean(person);
-};
-
-const notAllowed = (res) =>
-  res.status(403).json({
-    success: false,
-    message: 'You can only change tasks that are assigned to you or that you created.',
-  });
-
+const { Task, Project } = require('../../member-4-database-auth/models');
 
 /**
  * @desc    Get tasks with filtering (projectId, status, priority, assignee, search)
@@ -139,13 +117,6 @@ const createTask = async (req, res, next) => {
       });
     }
 
-    if (!(await assigneeInOrganization(assignee, orgId))) {
-      return res.status(400).json({
-        success: false,
-        message: 'Assignee must be a member of your organization.',
-      });
-    }
-
     // Determine max order within the status column
     const highestOrderTask = await Task.findOne({
       project: project._id,
@@ -213,15 +184,6 @@ const updateTask = async (req, res, next) => {
       subtasks,
     } = req.body;
 
-    if (!canEditTask(req.user, task)) return notAllowed(res);
-
-    if (assignee && !(await assigneeInOrganization(assignee, orgId))) {
-      return res.status(400).json({
-        success: false,
-        message: 'Assignee must be a member of your organization.',
-      });
-    }
-
     if (title) task.title = title.trim();
     if (description !== undefined) task.description = description;
     if (priority) task.priority = priority;
@@ -267,8 +229,6 @@ const updateTaskStatus = async (req, res, next) => {
       });
     }
 
-    if (!canEditTask(req.user, task)) return notAllowed(res);
-
     task.status = status;
     if (order !== undefined) {
       task.order = order;
@@ -307,8 +267,6 @@ const toggleSubtask = async (req, res, next) => {
         message: 'Task not found',
       });
     }
-
-    if (!canEditTask(req.user, task)) return notAllowed(res);
 
     const subtask = task.subtasks.id(req.params.subtaskId);
     if (!subtask) {
@@ -350,7 +308,7 @@ const deleteTask = async (req, res, next) => {
 
     // Role check: Only Owner, Manager, or the Creator can delete task
     const isOwnerOrManager = ['owner', 'manager'].includes(req.user.role);
-    const isCreator = sameId(task.creator, req.user._id);
+    const isCreator = task.creator.toString() === req.user._id.toString();
 
     if (!isOwnerOrManager && !isCreator) {
       return res.status(403).json({
