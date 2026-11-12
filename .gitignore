@@ -1,11 +1,7 @@
 node_modules/
-dist/
-build/
 .env
-.env.*
-!.env.example
-uploads/
-*.log
+.env.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 .DS_Store
-Thumbs.db
-.vscode/

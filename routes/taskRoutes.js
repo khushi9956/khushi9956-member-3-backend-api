@@ -9,11 +9,10 @@ const {
   toggleSubtask,
   deleteTask,
 } = require('../controllers/taskController');
-const { protect } = require('../middlewares/authMiddleware');
-const { scopeToOrganization } = require('../middlewares/roleMiddleware');
+const { protect } = require('../../member-4-database-auth/middlewares/authMiddleware');
+const { scopeToOrganization } = require('../../member-4-database-auth/middlewares/roleMiddleware');
 const {
   validateTaskInput,
-  validateTaskUpdate,
   validateStatusUpdate,
 } = require('../middlewares/validate');
 
@@ -29,7 +28,7 @@ router
 router
   .route('/:id')
   .get(getTaskById)
-  .put(validateTaskUpdate, updateTask)
+  .put(updateTask)
   .delete(deleteTask);
 
 // Kanban drag-and-drop status update

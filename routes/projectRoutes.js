@@ -7,12 +7,12 @@ const {
   updateProject,
   deleteProject,
 } = require('../controllers/projectController');
-const { protect } = require('../middlewares/authMiddleware');
+const { protect } = require('../../member-4-database-auth/middlewares/authMiddleware');
 const {
   authorizeRoles,
   scopeToOrganization,
-} = require('../middlewares/roleMiddleware');
-const { validateProjectInput, validateProjectUpdate } = require('../middlewares/validate');
+} = require('../../member-4-database-auth/middlewares/roleMiddleware');
+const { validateProjectInput } = require('../middlewares/validate');
 
 // All project routes require authentication and organization scoping
 router.use(protect);
@@ -26,7 +26,7 @@ router
 router
   .route('/:id')
   .get(getProjectById)
-  .put(authorizeRoles('owner', 'manager'), validateProjectUpdate, updateProject)
+  .put(authorizeRoles('owner', 'manager'), updateProject)
   .delete(authorizeRoles('owner'), deleteProject);
 
 module.exports = router;

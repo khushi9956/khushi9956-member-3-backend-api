@@ -1,26 +1,12 @@
 {
-  "name": "member-3-backend-api",
+  "name": "saas-backend-api",
   "version": "1.0.0",
-  "description": "Backend REST API Services for Project Management & Team Collaboration Platform (Member 3)",
+  "description": "Express.js REST API for SaaS Project Management, Tasks & Kanban Board",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js",
-    "seed": "node seeds/seed.js",
-    "test": "node --test tests/api.test.js"
+    "dev": "node server.js"
   },
-  "keywords": [
-    "express",
-    "rest-api",
-    "nodejs",
-    "project-management",
-    "kanban",
-    "tasks-api",
-    "rbac",
-    "validation"
-  ],
-  "author": "Member 3",
-  "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -28,8 +14,5 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.3.1"
-  },
-  "engines": {
-    "node": ">=18"
   }
 }

@@ -1,33 +1,32 @@
-// Central error handler. Controllers call next(error) and end up here.
+/**
+ * Centralized Global Error Handler Middleware
+ */
 const errorHandler = (err, req, res, next) => {
-  if (process.env.NODE_ENV !== 'test') {
-    console.error(`[error] ${req.method} ${req.url}:`, err.message || err);
-  }
+  let error = { ...err };
+  error.message = err.message;
 
-  // Broken JSON in the request body
-  if (err.type === 'entity.parse.failed') {
-    return res.status(400).json({ success: false, message: 'Request body is not valid JSON' });
-  }
+  console.error(`[Error Handler] ${req.method} ${req.url} ->`, err.message || err);
 
-  // Bad ObjectId
+  // Mongoose bad ObjectId
   if (err.name === 'CastError') {
-    return res.status(404).json({ success: false, message: `Resource not found with id '${err.value}'` });
+    const message = `Resource not found with id of '${err.value}'`;
+    return res.status(404).json({ success: false, message });
   }
 
-  // Duplicate key (for example an email that is already used)
+  // Mongoose duplicate key
   if (err.code === 11000) {
-    const field = Object.keys(err.keyValue || {})[0] || 'value';
-    return res.status(409).json({
-      success: false,
-      message: `Duplicate value entered for field '${field}'. Please choose another.`,
-    });
+    const field = Object.keys(err.keyValue)[0];
+    const message = `Duplicate value entered for field '${field}'. Please choose another.`;
+    return res.status(409).json({ success: false, message });
   }
 
+  // Mongoose validation error
   if (err.name === 'ValidationError') {
-    const message = Object.values(err.errors).map((item) => item.message).join(', ');
+    const message = Object.values(err.errors).map((val) => val.message).join(', ');
     return res.status(400).json({ success: false, message });
   }
 
+  // JWT errors
   if (err.name === 'JsonWebTokenError') {
     return res.status(401).json({ success: false, message: 'Invalid authentication token' });
   }
@@ -35,11 +34,9 @@ const errorHandler = (err, req, res, next) => {
     return res.status(401).json({ success: false, message: 'Authentication token has expired' });
   }
 
-  const status = err.statusCode || 500;
-  const hideDetails = status === 500 && process.env.NODE_ENV === 'production';
-  res.status(status).json({
+  res.status(error.statusCode || 500).json({
     success: false,
-    message: hideDetails ? 'Internal Server Error' : err.message || 'Internal Server Error',
+    message: error.message || 'Internal Server Error',
   });
 };
 

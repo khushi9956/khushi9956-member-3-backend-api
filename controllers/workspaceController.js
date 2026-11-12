@@ -1,4 +1,4 @@
-const { Workspace, Project, Task, User } = require('../models');
+const { Workspace, Project, Task, User } = require('../../member-4-database-auth/models');
 
 /**
  * @desc    Get all workspaces for organization
@@ -21,7 +21,7 @@ const getWorkspaces = async (req, res, next) => {
 };
 
 /**
- * @desc    Get dashboard metrics & KPIs
+ * @desc    Get dashboard metrics & KPIs (Week 1 & 2 requirements)
  * @route   GET /api/stats
  * @access  Private
  */
